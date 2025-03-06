@@ -4,6 +4,7 @@
 Tooling developed to calculate features from timeseries signals.
 The idea is feature calculation processes are composed of different steps.
 In general, steps are either:
+
     - Segmenation
     - Transformation
     - Calculation
