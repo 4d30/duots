@@ -9,18 +9,21 @@ from scipy import signal as sig
 
 from array import array
 
+import matplotlib.pyplot as plt
 
 def passalong(signal: tuple[array]) -> tuple[array]:
     return signal
 
-def dft(windows: tuple[array]) -> tuple[array]:
+def dft(windows_in: tuple[array]) -> tuple[array]:
 
     # Subtract the median value from each window
-    median = its.chain.from_iterable(windows)
+    median = its.chain.from_iterable(windows_in)
     median = sts.median(median)
-    medians = its.repeat(median, len(windows[0]))
-    medians = map(its.repeat, medians, its.repeat(len(windows)))
-    windows = map(lambda w, m: map(op.sub, w, m), windows, medians)
+    medians = its.repeat(median, len(windows_in[0]))
+    medians = map(its.repeat, medians, its.repeat(len(windows_in)))
+    medians = map(array, its.repeat('d'), medians)
+    medians = zip(*medians)
+    windows = map(lambda w, m: map(op.sub, w, m), windows_in, medians)
     windows = map(array, its.repeat('d'), windows)
     windows = tuple(windows)
 
@@ -36,23 +39,22 @@ def dft(windows: tuple[array]) -> tuple[array]:
     # Do the thing
     dfts = map(fft.rfft, hann_win_a)
     dfts = map(map, its.repeat(abs), dfts)
-    dfts = map(array, its.repeat('d'), dfts)
+    dfts = map(tuple, dfts)
     dfts = tuple(dfts)
 
-    freqs = fft.rfftfreq(len(windows[0]), d=1.0/100.0)
-    freqs = array('d', freqs)
+    # freqs = fft.rfftfreq(len(windows[0]), d=1.0/100.0)
+    # freqs = array('d', freqs)
 
-    data = map(zip, its.repeat(freqs), dfts)
-    data = map(dict, data)
-    data = tuple(data)
-
+    # data = map(zip, its.repeat(freqs), dfts)
+    # data = map(dict, data)
+    # data = tuple(data)
     return dfts
 
 
 def autocorrelate(signal: tuple[array]) -> tuple[array]:
     corr = map(sig.correlate, signal, signal)
     corr = map(op.methodcaller('tolist'), corr)
-    corr = map(array, its.repeat('d'), corr)
+    corr = map(tuple, corr)
     corr = tuple(corr)
     return corr
 
@@ -61,7 +63,7 @@ def zerosq(signal: array) -> array:
     def zq(signal):
         signal = map(op.sub, signal, its.repeat(sts.median(signal)))
         signal = map(pow, signal, its.repeat(2))
-        signal = array('d', signal)
+        signal = tuple(signal)
         return signal
     signal = map(zq, signal)
     signal = tuple(signal)
@@ -75,12 +77,11 @@ def findpeaks(signal: tuple[array]) -> tuple[array]:
                                   height=pk_ht,
                                   prominence=1)
         if not peaks.any():
-            return array('d', (float('nan'),
-                               float('nan'),))
+            return tuple((float('nan'), float('nan'),))
         peaks = op.itemgetter(*peaks)(signal)
         if not hasattr(peaks, '__len__'):
             peaks = (peaks,)
-        peaks = array('d', peaks)
+        peaks = tuple(peaks)
         return peaks
 
     peaks = map(fp, signal)

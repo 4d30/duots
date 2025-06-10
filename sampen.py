@@ -74,7 +74,10 @@ def sampen(signal: array) -> float:
     is_nan = map(op.ne, signal, signal)
     if any(is_nan):
         return float('nan')
-    r = 0.2*sts.stdev(signal)
+    try:
+        r = 0.2*sts.stdev(signal)
+    except:
+        return float('nan')
     return sampen_gpu(signal, m, r)
 
 
@@ -94,12 +97,11 @@ def sampen_gpu(data, m, r):
     if N > np.iinfo(np.uint64).max:
         raise ValueError("N is too large for uint64")
 
-    
     def get_available_memory(device_id):
         try:
             cuda.select_device(device_id)
             free_memory, total_memory = cuda.current_context().get_memory_info()
-            return free_memory 
+            return free_memory
         except cuda.cudadrv.driver.CudaAPIError:
             return 3 # :)
 
@@ -119,7 +121,7 @@ def sampen_gpu(data, m, r):
                 if free_memory >= required_memory_bytes:
                     available_device = device_id
                     break
-            
+
             if available_device is not None:
                 # Select the device with sufficient memory
                 cuda.select_device(available_device)
@@ -128,7 +130,7 @@ def sampen_gpu(data, m, r):
                 # Wait for a device with enough memory
                 time.sleep(10)  # Sleep for 2 seconds before retrying
 
-    required_memory_b = map(sys.getsizeof, data) 
+    required_memory_b = map(sys.getsizeof, data)
     required_memory_b = sum(required_memory_b) * 2
     this_device = select_device_with_available_memory(required_memory_b)
     if not this_device:

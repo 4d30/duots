@@ -22,13 +22,13 @@ def window(signal: array,
         return all(map(math.isfinite, x))
 
     win = filter(all_finite, win)
-    win = map(array, its.repeat('d'), win)
+    #win = map(tuple, win)
     win = tuple(win)
     return win
 
 
 def whole(signal: array) -> array:
-    return (array('d', signal),)
+    return (tuple(signal),)
 
 
 def split_continuous(signal: array) -> tuple[array]:

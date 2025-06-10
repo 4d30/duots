@@ -20,7 +20,7 @@ def __helper(function, signal):
             return function(signal)
         else:
             value = map(function, signal)
-            value = array('d', value)
+            value = tuple(value)
             return value
     elif isinstance(signal, float):
         return signal
@@ -28,11 +28,11 @@ def __helper(function, signal):
         breakpoint()
 
 
-#def sampen(signal: array) -> float:
-#    def _sampen(signal):
-#        return __sampen(signal)
-#    sampen = __helper(_sampen, signal)
-#    return sampen
+def sampen(signal: array) -> float:
+    def _sampen(signal):
+        return __sampen(signal)
+    sampen = __helper(_sampen, signal)
+    return sampen
 
 
 def take(signal):

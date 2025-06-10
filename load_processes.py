@@ -70,8 +70,7 @@ def write_session(config, buffer):
                'group_id',
                'instrument_id',
                'process_id',
-               'value',
-               'feature_def_id',)
+               'value')
     conn = psycopg2.connect(**config['database'])
     cur = conn.cursor()
     cur.execute("""SET search_path TO feature;""")

@@ -3,6 +3,7 @@
 import math
 import operator as op
 import itertools as its
+import functools as fts
 from array import array
 
 import more_itertools as mits
@@ -10,15 +11,14 @@ import more_itertools as mits
 import func_feats.segment.single as segment_i
 
 
-
-
 def synchronized_windows(signals: tuple[array]) -> tuple[tuple[array]]:
     """
     This function multiple signals into syncronized windows of size
     `size` and step `step`
+    (2xN) -> (2xNwxLw)
     """
     window_pairs = map(segment_i.window, signals)
-    window_pairs = zip(*window_pairs)
+    # window_pairs = zip(*window_pairs)
     window_pairs = tuple(window_pairs)
     return window_pairs
 
@@ -27,8 +27,10 @@ def synchronized_streams(signals: tuple[array]) -> tuple[tuple[array]]:
     """
     This should do the same thing as teh one above, but for the `whole`
     function
+    (2xN) -> (2x1xN)
     """
-    return (signals,)
+    signals = ((signals[0],), (signals[1],),)
+    return signals
 
 
 def split_continuous(signals: tuple[tuple[array]])\
@@ -42,7 +44,7 @@ def split_continuous(signals: tuple[tuple[array]])\
     segments = tuple(segments)
     acc = []
     for segment in segments:
-        foo = map(array, its.repeat('d'), segment)
+        foo = map(tuple, segment)
         foo = tuple(foo)
         acc.append(foo)
     segments = tuple(acc)

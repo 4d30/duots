@@ -4,6 +4,7 @@ import csv
 import gzip
 import itertools as its
 import operator as op
+import functools as fts
 import math
 
 from array import array
@@ -278,7 +279,7 @@ def _align_streams(streams: tuple) -> tuple:
     for a_stream in streams:
         masked = its.starmap(lambda f, b: f if b else float('nan'),
                              zip(a_stream, is_finite))
-        masked = array('d', masked)
+        masked = tuple(masked)
         acc.append(masked)
     these_streams = tuple(acc)
     return these_streams
@@ -317,7 +318,6 @@ def streams(data: tuple[dict], params: tuple) -> tuple[array]:
         return None
     return these_streams
 
-
 def stream(data: tuple[dict], params: tuple) -> array:
     """
     selects a stream from the data and masks off where the event is
@@ -343,7 +343,7 @@ def stream(data: tuple[dict], params: tuple) -> array:
     these_segments = zip(this_stream, these_segments)
     these_segments = its.starmap(lambda f, b: f if b else float('nan'),
                                  these_segments)
-    these_segments = array('f', these_segments)
+    these_segments = tuple(these_segments)
     if not these_segments:
         return None
 

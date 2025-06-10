@@ -22,18 +22,17 @@ def sensor_groups(config):
     QQ = """
         SET search_path TO feature;
         SELECT sg.id AS group_id,
-        array_agg(s.name) AS sensors
+            array_agg(s.name) AS sensors
         FROM sensor_group sg
         JOIN sensor_group_members sgm
-        ON sg.id = sgm.group_id
+            ON sg.id = sgm.group_id
         JOIN sensor s
-        ON sgm.sensor_id = s.id
+            ON sgm.sensor_id = s.id
         GROUP BY sg.id
         ORDER BY sg.id;
         """
     ss = psql.execute(config, QQ)
-    for s in ss:
-        yield s
+    yield from ss
 
 
 def instruments(config):
@@ -45,8 +44,7 @@ def instruments(config):
         ORDER BY ii.id;
         """
     ii = psql.execute(config, QQ)
-    for i in ii:
-        yield i
+    yield from ii
 
 
 def events(config):
@@ -58,8 +56,7 @@ def events(config):
         ORDER BY e.id;
         """
     ee = psql.execute(config, QQ)
-    for e in ee:
-        yield e
+    yield from ee
 
 
 def behaviors(config):
@@ -73,12 +70,11 @@ def behaviors(config):
     bb = psql.execute(config, QQ)
     bb = its.chain([{'behavior_id': 'nan', 'behavior': None}], bb)
     bb = tuple(bb)
-    for b in bb:
-        yield b
+    yield from bb
 
 
 def _make_generator(module: types.ModuleType) -> types.GeneratorType:
-    iterable = ins.getmembers(module, ins.isfunction)
+    iterable = ins.getmembers(module, ins.isroutine)
     for name, func in iterable:
         if not name.startswith('__'):
             yield name, func
@@ -87,8 +83,7 @@ def _make_generator(module: types.ModuleType) -> types.GeneratorType:
 def processes():
     procs = its.chain(two_func(), four_func())
     #procs = its.chain(four_func(),)# three_func(), four_func())
-    for each in procs:
-        yield each
+    yield from procs
 
 
 def two_func():
@@ -99,8 +94,8 @@ def two_func():
     c2 = fts.partial(_make_generator, calculator_i)()
     iterable = its.product(ss, tt, c1, c2)
     iterable = filter(select.valid_two_func, iterable)
-    for each in iterable:
-        yield each
+    yield from iterable
+
 
 def three_func():
     # I don't think three-func is useful
@@ -112,8 +107,7 @@ def three_func():
     c3 = fts.partial(_make_generator, calculator_ii)()
     iterable = its.product(ss, tt, c1, c2, c3)
     iterable = filter(select.valid_three_func, iterable)
-    for each in iterable:
-        yield each
+    yield from iterable
 
 def four_func():
     # Symmetry & avg
@@ -125,22 +119,35 @@ def four_func():
     c4 = fts.partial(_make_generator, features)()
     iterable = its.product(ss, tt, c1, c2, c3, c4)
     iterable = filter(select.valid_four, iterable)
-    for each in iterable:
-        yield each
+    yield from iterable
 
 
-
-def sessions(config):
-    QQ = """SELECT distinct spl.spl_row,
-            combined_file as path
-         FROM spl
-         JOIN process_files pf
-         ON spl.spl_row = pf.spl_row
-         WHERE pf.process_id = '241211_re_ecfs'
-         ORDER BY spl_row;"""
+def sessions(config, session=None):
+    if session:
+        QQ = """SELECT distinct spl.spl_row,
+                combined_file as path
+             FROM spl
+             JOIN process_files pf
+                 ON spl.spl_row = pf.spl_row
+             LEFT JOIN feature.values v
+                 ON spl.spl_row = v.spl_row
+             WHERE combined_file is not null
+                 AND v.spl_row = {}
+             ORDER BY spl_row;""".format(session)
+    else:
+        QQ = """SELECT distinct spl.spl_row,
+                combined_file as path
+             FROM spl
+             JOIN process_files pf
+                 ON spl.spl_row = pf.spl_row
+             LEFT JOIN feature.values v
+                 ON spl.spl_row = v.spl_row
+             WHERE combined_file is not null
+                 AND v.spl_row is null
+             ORDER BY spl_row;"""
     sessions = psql.execute(config, QQ)
-    #rto = config['paths']['rto']
-    rto = '/mnt/data/corbett/'
+    rto = config['paths']['rto']
+    # rto = '/mnt/data/corbett/'
     for session in sessions:
         session['config'] = config
         session['path'] = os.path.join(rto, session['path'])
