@@ -15,7 +15,7 @@
 ## Design Philosophy
 - **Composable**: Build powerful feature extractors from simple, small functions.
 - **Efficient**: Shared operations are cached; performance scales with reuse.
-- **Minimal**: Only `scipy` is used for essential math; avoids heavy dependencies.
+- **Minimal**: Only `scipy` is used for FFT, skew, and kurtosis; avoids heavy dependencies.
 
 ## 📦 Installation
 ### From PyPI
