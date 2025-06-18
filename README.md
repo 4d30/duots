@@ -18,7 +18,7 @@
 - **Minimal**: Only `scipy` is used for FFT, skew, and kurtosis; avoids heavy dependencies.
 
 ## 📦 Installation
-### From PyPI
+### From PyPI [duots](https://pypi.org/project/duots/)
 ```bash
 pip install duots
 ```
