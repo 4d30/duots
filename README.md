@@ -1,6 +1,6 @@
 # duots
 
-**duots** is a lightweight Python package for calculating features from paired time series signals — like those collected from symmetrical body parts (e.g., left and right wrists). It provides a composable, lazy, and efficient pipeline to build complex signal analysis routines without relying on heavy external libraries like NumPy or pandas.
+**duots** is a lightweight Python package for calculating features from paired time series signals — like those collected from symmetrical body parts (e.g., left and right wrists). It provides a composable, lazy, and efficient pipeline to build complex signal analysis routines.
 
 ---
 
