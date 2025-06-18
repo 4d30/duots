@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "duots"
+version = "0.1.0"
+description = "Composable timeseries feature extraction for paired signals."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "BSD-2-Clause" }
+authors = [
+  { name = "J Mifsud", email = "jmifsud@posteo.net" }
+]
+dependencies = [
+  "scipy>=1.8"
+]
+
+[project.optional-dependencies]
+gpu = [
+  "sampen-gpu"
+]
+
+[project.urls]
+Homepage = "https://github.com/4d30/duots"
+Repository = "https://github.com/4d30/duots"
+Issues = "https://github.com/4d30/duots/issues"
+
+[tool.setuptools]
+packages = ["duots"]
+include-package-data = true
