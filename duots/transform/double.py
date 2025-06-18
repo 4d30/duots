@@ -8,7 +8,7 @@ from scipy import signal
 from scipy import fft
 
 
-import transform.single as single
+from transform import single as single
 
 
 @fts.lru_cache(maxsize=128)

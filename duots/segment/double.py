@@ -8,7 +8,7 @@ from array import array
 
 import more_itertools as mits
 
-import segment.single as segment_i
+from segment import single as segment_i
 
 
 @fts.lru_cache(maxsize=128)

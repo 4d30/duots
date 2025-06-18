@@ -6,12 +6,12 @@ import functools as fts
 
 import types
 
-import filter_select as filter_select
-import segment.double as segment_ii
-import transform.double as transform_ii
-import calculators.single as calculator_i
-import calculators.double as calculator_ii
-import calculators.features as features
+from . import filter_select
+from .segment import double as segment_ii
+from .transform import double as transform_ii
+from .calculators import single as calculator_i
+from .calculators import double as calculator_ii
+from .calculators import features as features
 
 
 def _make_generator(module: types.ModuleType) -> types.GeneratorType:

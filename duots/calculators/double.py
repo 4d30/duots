@@ -6,7 +6,7 @@ import statistics as sts
 from array import array
 import functools as fts
 
-import calculators.single as single
+from calculators import single as single
 
 
 def __transpose(signal_pair):
