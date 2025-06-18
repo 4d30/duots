@@ -6,19 +6,31 @@ import statistics as sts
 from array import array
 import functools as fts
 
-import func_feats.calculators.single as single
+import duots.calculators.single as single
 
-@fts.lru_cache(maxsize=128)
+
 def __transpose(signal_pair):
+    # aa = op.itemgetter(0)(signal_pair)
+    # bb = op.itemgetter(1)(signal_pair)
+    # tp = tuple(aa, bb)
     tp = zip(*signal_pair)
     tp = tuple(tp)
     return tp
+
+
+@fts.lru_cache(maxsize=128)
+def length(signal_pair: tuple[array]) -> float:
+    length_ = map(single.length, signal_pair)
+    length_ = tuple(length_)
+    return length_
+
 
 @fts.lru_cache(maxsize=128)
 def take(signal_pair: tuple[array]) -> float:
     take_ = map(single.take, signal_pair)
     take_ = tuple(take_)
     return take_
+
 
 @fts.lru_cache(maxsize=128)
 def sampen(signal_pair: tuple[array]) -> float:
@@ -103,33 +115,20 @@ def skew(signal_pair: tuple[array]) -> float:
     skew_ = tuple(skew_)
     return skew_
 
+
 @fts.lru_cache(maxsize=128)
 def kurtosis(signal_pair: tuple[array]) -> float:
     kurtosis_ = map(single.kurtosis, signal_pair)
     kurtosis_ = tuple(kurtosis_)
     return kurtosis_
 
-#def kurtosis(signal_pair: tuple[array]) -> float:
-#    if isinstance(signal_pair[0], float):
-#        kurtosis_ = single.kurtosis(signal_pair)
-#    else:
-#        kurtosis_ = map(map, its.repeat(single.kurtosis), signal_pair)
-#        kurtosis_ = map(array, its.repeat('d'), kurtosis_)
-#        kurtosis_ = tuple(kurtosis_)
-#    return kurtosis_
 
-
-# TODO FIX THIS, MAYBE TEST FOR SIGNAL TYPE AND THEN DO THE THING
-# -- transform.double.cross_correlation also needs this treatment
 @fts.lru_cache(maxsize=128)
 def covariance(signal_pair: tuple[array]) -> float:
-    sig_a = map(op.itemgetter(0), signal_pair)
+    sig_a = op.itemgetter(0)(signal_pair)
     sig_a = tuple(sig_a)
-
-    sig_b = map(op.itemgetter(1), signal_pair)
+    sig_b = op.itemgetter(1)(signal_pair)
     sig_b = tuple(sig_b)
-    #breakpoint()
     cov = map(sts.covariance, sig_a, sig_b)
     cov = tuple(cov)
-    #breakpoint()
     return cov

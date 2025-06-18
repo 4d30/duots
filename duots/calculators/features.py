@@ -3,7 +3,6 @@
 import operator as op
 import itertools as its
 
-from func_feats.calculators.single import take
 
 def symmidx(value_pair: tuple[float]) -> float:
     val_a, val_b = value_pair

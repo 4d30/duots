@@ -4,7 +4,6 @@ import csv
 import gzip
 import itertools as its
 import operator as op
-import functools as fts
 import math
 
 from array import array
@@ -40,6 +39,9 @@ def is_hed_cst(pair: tuple) -> bool:
     if pair[0]['sensors'] == 'hed' \
             and pair[1]['sensors'] == 'cst':
         return True
+    if pair[0]['sensors'] == 'cst' \
+            and pair[1]['sensors'] == 'hed':
+        return True
     return False
 
 
@@ -56,7 +58,27 @@ def across_midline(pair: tuple) -> bool:
 
 def valid_two_func(sequence: tuple) -> bool:
     """
-    tests if the sequence is valid
+    tests if the sequence is valid.
+    the `two_func` sequences deal with covariance and cross-correlation
+    functions (which change the data shape)
+
+    We can do EITHER cov/xcorr or an avg/symm_index to bridge the
+    participant's midline.
+
+    XCORR
+    (2xWxN) -> (WxO) -> (Wx1) -> "Not `take`"
+                ^^^crosses midline
+
+    COV
+    (2xWxN) -> (2xW) -> (Wx1) -> "Not `take`"
+                         ^^^crosses midline
+
+    2 - Number of streams
+    W - Number of windows (is 1 for synch streams)
+    N - Samples per window
+    O - Values per transformed signal (varies)
+
+    avg/symm_idx calculations are handled in another function
     0: segment
     1: transform
     2: calculator
@@ -69,27 +91,43 @@ def valid_two_func(sequence: tuple) -> bool:
     if sequence[0][0] == 'split_continuous':
         return False
 
-    # Last step must be take for two func
-    if sequence[0][0] == 'synchronized_streams':
-        if sequence[3][0] != 'take':
-            return False
-
-
-    # Only one dimension reduction function allowed
-    is_xcorr = (sequence[1][0] == 'cross_correlate') 
-    is_cov = (sequence[2][0] == 'covariance')
-    neither = not(is_xcorr or is_cov)
-    if (not op.xor(is_xcorr, is_cov)) or neither:
+    # Must not finish with take when starting
+    # with streams
+    if sequence[0][0] == 'synchronized_streams'\
+            and sequence[3][0] != 'take':
         return False
 
-    # Doesn't make sense in this context
-    if is_cov:
-        if sequence[1][0] == 'findpeaks':
+    # Must finish with take when starting
+    # with windows
+    if sequence[0][0] == 'synchronized_windows':
+        if sequence[3][0] == 'take'\
+                or sequence[3][0] == 'take':
             return False
+
+    # Only one dimension reduction function allowed
+    is_xcorr = (sequence[1][0] == 'cross_correlate')
+    is_cov = (sequence[2][0] == 'covariance')
+    if (not op.xor(is_xcorr, is_cov)):
+        return False
+
+    # Length is only used for find_peaks symm/avg
+    # which we're not using here
+    if sequence[1][0] == 'findpeaks':
+        return False
+    if sequence[2][0] == 'length':
+        return False
+    if sequence[3][0] == 'length':
+        return False
+
+    # When operating with cross correlated windoes,
+    # the second function must not be take
+    if is_xcorr and sequence[2][0] == 'take':
+        return False
+
     return True
 
 
-#def valid_three_func(sequence: tuple) -> bool:
+# def valid_three_func(sequence: tuple) -> bool:
 #    """
 #    tests if the sequence is valid
 #    0: segment
@@ -105,11 +143,11 @@ def valid_two_func(sequence: tuple) -> bool:
 #    if sequence[0][0] != 'synchronized_windows':
 #        return False
 #
-#    is_xcorr = (sequence[1][0] == 'cross_correlate') 
-#    cov1 = (sequence[2][0] == 'covariance') 
+#    is_xcorr = (sequence[1][0] == 'cross_correlate')
+#    cov1 = (sequence[2][0] == 'covariance')
 #    if cov1:
 #        return False
-#    cov2 = (sequence[3][0] == 'covariance') 
+#    cov2 = (sequence[3][0] == 'covariance')
 #    neither = not(is_xcorr or cov2)
 #    if (not op.xor(is_xcorr, cov2)) or neither:
 #        return False
@@ -122,31 +160,36 @@ def valid_four(sequence: tuple) -> bool:
     four function sequences will calculate symmetry and average across
     midline
 
+    cross-corr and covariance are not valid here, they're covered in
+    another function
+
     0: segment
     1: transform
     2: calculator
-    3: transpose
-    4: calculator
-    5: [symm, avg, ...]
+    3: calculator
+    4: [symm, avg, ...]
     """
-    if len(sequence) != 6:
+    if len(sequence) != 5:
         return False
     # 'split_continuous' is not valid here
     if sequence[0][0] == 'split_continuous':
         return False
 
+    # The dimensionality requires step 3 to be `take` if
+    # the step 1 is `synchronized_streams`
     if sequence[0][0] == 'synchronized_streams'\
-        and sequence[4][0] != 'take':
+            and sequence[3][0] != 'take':
         return False
 
+    # The dimensionality requires step 3 to NOT be `take` if
+    # the step 1 is `synchronized_windows`
     if sequence[0][0] == 'synchronized_windows'\
-        and sequence[4][0] == 'take':
+            and sequence[3][0] == 'take':
         return False
 
+    # cross correlation and covariance are handled in a seperate
+    # function, see above
     if sequence[1][0] == 'cross_correlate':
-        return False
-
-    if sequence[2][0] == 'take':
         return False
 
     if sequence[2][0] == 'covariance':
@@ -155,21 +198,18 @@ def valid_four(sequence: tuple) -> bool:
     if sequence[3][0] == 'covariance':
         return False
 
-    if sequence[3][0] == 'take':
+    # `take` doesn't make sense in this context
+    if sequence[2][0] == 'take':
         return False
 
-    if sequence[4][0] == 'covariance':
-        return False
-
-
-#    if sequence[4][0] == 'take':
-#        return False
-
-    if sequence[5][0] == 'take':
+    # We will ONLY use length for counting peaks
+    if sequence[3][0] == 'length'\
+            and sequence[2][0] != 'find_peaks':
         return False
 
     # Windowing is required for DFT
-    if sequence[1][0] == 'dft' and sequence[0][0] != 'synchronized_windows':
+    if sequence[1][0] == 'dft' \
+            and sequence[0][0] != 'synchronized_windows':
         return False
     return True
 
@@ -188,7 +228,8 @@ def _behavior(data: tuple[dict], params: tuple) -> tuple[bool]:
     is_behavior = map(op.itemgetter('behavior'), data)
     is_behavior = map(float, is_behavior)
     is_behavior = map(int, is_behavior)
-    is_behavior = map(op.eq, is_behavior, its.repeat(params['behavior_id']))
+    is_behavior = map(op.eq, is_behavior,
+                      its.repeat(params['behavior_id']))
     is_behavior = tuple(is_behavior)
     is_behavior = tuple(is_behavior)
     return is_behavior
@@ -317,6 +358,7 @@ def streams(data: tuple[dict], params: tuple) -> tuple[array]:
     if not any_data:
         return None
     return these_streams
+
 
 def stream(data: tuple[dict], params: tuple) -> array:
     """

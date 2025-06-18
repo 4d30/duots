@@ -1,34 +1,25 @@
 #!/bin/env python
 
 import itertools as its
-import functools as fts
 import operator as op
 import statistics as sts
-from array import array
 import math
 
 from scipy import stats
 
-import func_feats.compose as compose
-
-from func_feats.sampen import sampen  as __sampen
+from duots.sampen import sampen as __sampen
 
 
 def __helper(function, signal):
-    if hasattr(signal, '__len__'):
-        if isinstance(signal[0], float):
-            return function(signal)
-        else:
-            value = map(function, signal)
-            value = tuple(value)
-            return value
-    elif isinstance(signal, float):
-        return signal
+    if hasattr(signal[0], '__iter__'):
+        value = map(function, signal)
+        value = tuple(value)
+        return value
     else:
-        breakpoint()
+        return function(signal)
 
 
-def sampen(signal: array) -> float:
+def sampen(signal: tuple) -> float:
     def _sampen(signal):
         return __sampen(signal)
     sampen = __helper(_sampen, signal)
@@ -36,15 +27,9 @@ def sampen(signal: array) -> float:
 
 
 def take(signal):
-    if isinstance(signal, float):
-        take_one_ = signal
-        return take_one_
-    else:
-        take_one_ = iter(signal)
-        take_one_ = next(take_one_, float('nan'))
-        return take_one_
-
-        
+    take_one_ = iter(signal)
+    take_one_ = next(take_one_, float('nan'))
+    return take_one_
 
 
 def lag(signal):
@@ -86,15 +71,15 @@ def mav(signal):
     return val
 
 
-def mad(signal: array) -> float:
+def mad(signal: tuple) -> float:
     def _mad(signal):
         "median absolute deviation"
         signal_median = median(signal)
         if signal_median != signal_median:
             return float('nan')
-        deviation_from_median  = map(op.sub, signal, its.repeat(signal_median))
+        deviation_from_median = map(op.sub, signal, its.repeat(signal_median))
         deviation_from_median = tuple(deviation_from_median)
-        abs_dev_from_med  = map(abs, deviation_from_median)
+        abs_dev_from_med = map(abs, deviation_from_median)
         abs_dev_from_med = tuple(abs_dev_from_med)
         mad = sts.median(abs_dev_from_med)
         return mad
@@ -104,7 +89,7 @@ def mad(signal: array) -> float:
 # Smith's motion complexity
 
 
-def maxvalue(signal: array) -> float:
+def maxvalue(signal: tuple) -> float:
     def _max(signal):
         if not signal:
             return float('nan')
@@ -113,7 +98,7 @@ def maxvalue(signal: array) -> float:
     return max_
 
 
-def minvalue(signal: array) -> float:
+def minvalue(signal: tuple) -> float:
     def _min(signal):
         if not signal:
             return float('nan')
@@ -122,14 +107,14 @@ def minvalue(signal: array) -> float:
     return min_
 
 
-#def length(signal: array) -> float:
-#    def _length(signal):
-#        return len(signal)
-#    len_ = __helper(_length, signal)
-#    return len_
+def length(signal: tuple) -> float:
+    def _length(signal):
+        return len(signal)
+    len_ = __helper(_length, signal)
+    return len_
 
 
-def mean(signal: array) -> float:
+def mean(signal: tuple) -> float:
     def _mean(signal):
         if len(signal) < 2:
             return float('nan')
@@ -138,7 +123,7 @@ def mean(signal: array) -> float:
     return mean_val
 
 
-def median(signal: array) -> float:
+def median(signal: tuple) -> float:
 
     def _median(signal):
         if not signal:
@@ -150,7 +135,7 @@ def median(signal: array) -> float:
     return median
 
 
-def mode(signal: array) -> float:
+def mode(signal: tuple) -> float:
     def _mode(signal):
         if not signal:
             return float('nan')
@@ -159,7 +144,7 @@ def mode(signal: array) -> float:
     return mode
 
 
-def stdev(signal: array) -> float:
+def stdev(signal: tuple) -> float:
     def _stdev(signal):
         if len(signal) < 2:
             return float('nan')
@@ -171,7 +156,7 @@ def stdev(signal: array) -> float:
     return stdev
 
 
-def variance(signal: array) -> float:
+def variance(signal: tuple) -> float:
     def _variance(signal):
         if len(signal) < 2:
             return float('nan')
@@ -183,7 +168,7 @@ def variance(signal: array) -> float:
     return var
 
 
-def skew(signal: array) -> float:
+def skew(signal: tuple) -> float:
     def _skew(signal):
         any_nan = map(op.ne, signal, signal)
         if any(any_nan):
@@ -197,11 +182,13 @@ def skew(signal: array) -> float:
         if stddev < sigma*mean_abs:
             return float('nan')
         return stats.skew(signal)
+
     skew = __helper(_skew, signal)
     return skew
 
 
-def kurtosis(signal: array) -> float:
+def kurtosis(signal: tuple) -> float:
+
     def _kurtosis(signal):
         stddev = stdev(signal)
         mean_val = mean(signal)

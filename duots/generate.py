@@ -8,14 +8,14 @@ import collections as cts
 
 import types
 
-import func_feats.select as select
-import func_feats.segment.double as segment_ii
-import func_feats.transform.double as transform_ii
-import func_feats.calculators.single as calculator_i
-import func_feats.calculators.double as calculator_ii
-import func_feats.calculators.features as features
+import duots.filter_select as filter_select
+import duots.segment.double as segment_ii
+import duots.transform.double as transform_ii
+import duots.calculators.single as calculator_i
+import duots.calculators.double as calculator_ii
+import duots.calculators.features as features
 
-import func_feats.psql as psql
+import duots.psql as psql
 
 
 def sensor_groups(config):
@@ -81,8 +81,9 @@ def _make_generator(module: types.ModuleType) -> types.GeneratorType:
 
 
 def processes():
-    procs = its.chain(two_func(), four_func())
-    #procs = its.chain(four_func(),)# three_func(), four_func())
+    procs = its.chain(four_func(),)# three_func(), four_func())
+    procs = its.chain(two_func(),)# four_func())
+    procs = its.chain(four_func(), two_func(),)# four_func())
     yield from procs
 
 
@@ -93,7 +94,7 @@ def two_func():
     c1 = fts.partial(_make_generator, calculator_ii)()
     c2 = fts.partial(_make_generator, calculator_i)()
     iterable = its.product(ss, tt, c1, c2)
-    iterable = filter(select.valid_two_func, iterable)
+    iterable = filter(filter_select.valid_two_func, iterable)
     yield from iterable
 
 
@@ -106,19 +107,20 @@ def three_func():
     c2 = fts.partial(_make_generator, calculator_ii)()
     c3 = fts.partial(_make_generator, calculator_ii)()
     iterable = its.product(ss, tt, c1, c2, c3)
-    iterable = filter(select.valid_three_func, iterable)
+    iterable = filter(filter_select.valid_three_func, iterable)
     yield from iterable
+
 
 def four_func():
     # Symmetry & avg
     ss = fts.partial(_make_generator, segment_ii)()
     tt = fts.partial(_make_generator, transform_ii)()
     c1 = fts.partial(_make_generator, calculator_ii)()
-    c2 = (('transpose', calculator_ii.__transpose,),)
+    # c2 = (('transpose', calculator_ii.__transpose,),)
     c3 = fts.partial(_make_generator, calculator_ii)()
     c4 = fts.partial(_make_generator, features)()
-    iterable = its.product(ss, tt, c1, c2, c3, c4)
-    iterable = filter(select.valid_four, iterable)
+    iterable = its.product(ss, tt, c1, c3, c4)
+    iterable = filter(filter_select.valid_four, iterable)
     yield from iterable
 
 

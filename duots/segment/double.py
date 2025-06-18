@@ -8,9 +8,10 @@ from array import array
 
 import more_itertools as mits
 
-import func_feats.segment.single as segment_i
+import duots.segment.single as segment_i
 
 
+@fts.lru_cache(maxsize=128)
 def synchronized_windows(signals: tuple[array]) -> tuple[tuple[array]]:
     """
     This function multiple signals into syncronized windows of size
@@ -23,6 +24,7 @@ def synchronized_windows(signals: tuple[array]) -> tuple[tuple[array]]:
     return window_pairs
 
 
+@fts.lru_cache(maxsize=128)
 def synchronized_streams(signals: tuple[array]) -> tuple[tuple[array]]:
     """
     This should do the same thing as teh one above, but for the `whole`
@@ -33,6 +35,7 @@ def synchronized_streams(signals: tuple[array]) -> tuple[tuple[array]]:
     return signals
 
 
+@fts.lru_cache(maxsize=128)
 def split_continuous(signals: tuple[tuple[array]])\
         -> tuple[tuple[tuple[array]]]:
     """
