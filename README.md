@@ -37,7 +37,7 @@ from duots import generate, compose
 # They must be tuples, of the same length, without NaNs
 sig_a = tuple(range(1, 100))
 sig_b = tuple(range(1, 100))
-signal_pair = (sig_a, sig_b)
+signal_pair = (sig_a, sig_b,)
 
 # Calculate values for each process
 for proc in generate.processes():
