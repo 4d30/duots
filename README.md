@@ -1,12 +1,31 @@
-# func_feats
+# duots
 
-## Overview
-Tooling developed to calculate features from timeseries signals.
-The idea is feature calculation processes are composed of different steps.
-In general, steps are either:
+**duots** is a lightweight Python package for calculating features from paired time series signals — like those collected from symmetrical body parts (e.g., left and right wrists). It provides a composable, lazy, and efficient pipeline to build complex signal analysis routines without relying on heavy external libraries like NumPy or pandas.
 
-    - Segmenation
-    - Transformation
-    - Calculation
+---
 
-This code combines these steps to create a variety of feature calculation processes.
+## Features
+-  **Composable feature pipelines** using functional programming
+-  Modular primitives: segmentation, transformation, timeseries ops, value aggregation
+-  Efficient via `functools.lru_cache` (minimizes redundant computation)
+-  **Minimal dependencies**: uses only `scipy`
+-  Designed for **paired signals** (e.g., `(left, right)` or `(x, y)`)
+-  Easy to extend, debug, and test
+
+## Design Philosophy
+- **Composable**: Build powerful feature extractors from simple, small functions.
+- **Efficient**: Shared operations are cached; performance scales with reuse.
+- **Minimal**: Only `scipy` is used for essential math; avoids heavy dependencies.
+
+## 📦 Installation
+### From PyPI
+```bash
+pip install duots
+```
+### From Source
+```bash
+git clone https://github.com/4d30/duots.git
+cd duots
+pip install .
+```
+
