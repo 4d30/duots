@@ -7,7 +7,10 @@ import math
 
 from scipy import stats
 
-from duots.sampen import sampen as __sampen
+try:
+    from sampen import sampen as __sampen
+except ImportError:
+    __sampen = None
 
 
 def __helper(function, signal):
@@ -20,6 +23,8 @@ def __helper(function, signal):
 
 
 def sampen(signal: tuple) -> float:
+    if __sampen is None:
+        return float('nan')
     def _sampen(signal):
         return __sampen(signal)
     sampen = __helper(_sampen, signal)
