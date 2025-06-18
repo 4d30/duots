@@ -8,7 +8,7 @@
 -  **Composable feature pipelines** using functional programming
 -  Modular primitives: segmentation, transformation, timeseries ops, value aggregation
 -  Efficient via `functools.lru_cache` (minimizes redundant computation)
--  **Minimal dependencies**: uses only `scipy` (and optionally `sampen-gpu`)
+-  **Minimal dependencies**: uses only `scipy` (and optionally [sampen-gpu](https://github.com/4d30/sampen-gpu)) 
 -  Designed for **paired signals** (e.g., `(left, right)` or `(x, y)`)
 -  Easy to extend, debug, and test
 
