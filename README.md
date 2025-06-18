@@ -29,3 +29,23 @@ cd duots
 pip install .
 ```
 
+## Example Usage
+```python
+from duots import generate, compose
+
+# Create a pair of signals, e.g., (left, right)
+# They must be tuples, of the same length, without NaNs
+signal_pair = (tuple(range(1, 100)), tuple(range(1, 100)))
+
+# Calculate values for each process
+for proc in generate.processes():
+    names, funcs = zip(*proc)
+    name = compose.descriptors(names)
+    composed_function = compose.functions(funcs)
+    value = composed_function(signal_pair)
+    print(f"{name}: {value}")
+```
+    
+
+
+
