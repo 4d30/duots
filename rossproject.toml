@@ -1,6 +1,11 @@
 name = "duots"
-version = "0.1.1"
+version = "0.1.2"
 language = "python"
-authors = []
-dependencies = []
+authors = [
+    "J Mifsud jmifsud@posteo.net",
+]
+dependencies = [
+    "scipy>=1.8",
+    "more-itertools>=10.7.0",
+]
 readme = "README.md"

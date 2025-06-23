@@ -6,10 +6,15 @@ build-backend = "hatchling.build"
 
 [project]
 name = "duots"
-version = "0.1.1"
-authors = []
+version = "0.1.2"
+authors = [
+    "J Mifsud jmifsud@posteo.net",
+]
 readme = "README.md"
-dependencies = []
+dependencies = [
+    "scipy>=1.8",
+    "more-itertools>=10.7.0",
+]
 
 [project.urls]
 Repository = "git@github.com:4d30/duots"
